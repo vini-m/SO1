@@ -1,0 +1,98 @@
+package controller;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Properties;
+import java.util.Set;
+
+public class Proc {
+	
+	public Proc(){
+		super();
+	}
+	
+	public String os(){
+		return System.getProperty("os.name");
+	}
+	
+	public void properties(){
+		Properties prop = System.getProperties();
+		Set<Object> keys = prop.keySet();
+		
+		for(Object key : keys){
+			System.out.print(key.toString() + " | ");
+			System.out.print(
+				System.getProperty(key.toString()) + 
+				"\n"
+			);
+		}
+	}
+	
+	public void callProcess(String path){
+		try{
+			Runtime.getRuntime().exec(path);
+		} catch (Exception e) {
+			String msg = e.getMessage();
+			System.out.println("Couldn\'t start process - " + msg);
+			if(msg.contains("740")){
+				StringBuffer buffer = new StringBuffer();
+				buffer.append("cmd.exe /c ");
+				buffer.append(path);
+				System.out.println("Trying to elevate privileges");
+				this.callProcess(buffer.toString());
+			}
+		}
+	}
+	
+	public void readProcess(String path){
+		try {
+			Process proc = Runtime.getRuntime().exec(path);
+			InputStream stream = proc.getInputStream();
+			InputStreamReader streamReader = new InputStreamReader(stream);
+			BufferedReader buffer = new BufferedReader(streamReader);
+			String line = buffer.readLine();
+			while(line != null){
+				System.out.println(line);
+				line = buffer.readLine();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void killProcess(String proc){
+		String cmdPID = "TASKKILL /PID ";
+		String cmdName = "TASKKILL /IM ";
+		StringBuffer buffer = new StringBuffer();
+		
+		int pid = 0;
+		try{
+			pid = Integer.parseInt(proc);
+			buffer.append(cmdPID);
+		} catch (NumberFormatException e) {
+			buffer.append(cmdName);
+		} finally {
+			buffer.append(proc);
+		}
+		
+		this.callProcess(buffer.toString());
+	}
+}
+
+package view;
+
+import controller.Proc;
+
+public class Principal {
+	public static void main(String[] args) {
+		Proc proc = new Proc();
+		//System.out.println(proc.os());
+		//proc.properties();
+		//proc.callProcess("C:\\Windows\\regedit.exe");
+		proc.readProcess("tasklist.exe /fo table");
+		proc.killProcess("6012");
+	}
+}
