@@ -12,7 +12,7 @@ public class RedesController {
 	}
 	
 	public String ip(String osName) {
-		//TODO
+		// TODO awk script
 		StringBuffer adapterInfo = new StringBuffer();
 		StringBuffer cmd = new StringBuffer();
 		if (osName.contains("Win")) cmd.append("ipconfig");
@@ -26,14 +26,15 @@ public class RedesController {
 			
 			String line;
 			do {
-				
 				line = buffer.readLine();
+				if (line.contains("flags")) 
+					adapterInfo.append();
 			} while(line != null);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		return adapterInfo;
+		return adapterInfo.toString();
 	}
 }
